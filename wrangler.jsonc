@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "tts-studio",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-29",
+  "assets": {
+    "directory": "./public"
+  }
+}

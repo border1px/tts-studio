@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="在 Cloudflare Workers 上将文字转换为语音，或将音频转换为文字">
+    <title>语音工作台</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>语音工作台</h1>
+          <p class="subtitle">把文字变成语音，也能把音频转成文字。</p>
+        </div>
+      </header>
+
+      <section id="accessSection" class="access-bar" hidden>
+        <label for="accessKey">访问密钥</label>
+        <input id="accessKey" type="password" autocomplete="off" placeholder="输入部署者提供的访问密钥">
+      </section>
+
+      <div class="worknav">
+        <nav class="mode-tabs" role="tablist" aria-label="功能切换">
+          <button id="ttsTab" type="button" role="tab" aria-controls="ttsPanel" class="active" aria-selected="true">文字转语音</button>
+          <button id="sttTab" type="button" role="tab" aria-controls="sttPanel" aria-selected="false">语音转文字</button>
+        </nav>
+        <a class="docs-link" href="/docs">API 文档</a>
+      </div>
+
+      <section id="ttsPanel" class="panel" role="tabpanel" aria-labelledby="ttsTab">
+        <form id="ttsForm">
+          <fieldset class="source-switch">
+            <legend>输入方式</legend>
+            <label><input type="radio" name="source" value="text" checked> <span>输入文字</span></label>
+            <label><input type="radio" name="source" value="file"> <span>上传 TXT</span></label>
+          </fieldset>
+          <div id="textSource" class="field">
+            <label for="text">文字内容</label>
+            <textarea id="text" rows="4" placeholder="在这里输入要朗读的文字"></textarea>
+            <small id="textCount">0 / 10000</small>
+          </div>
+          <div id="fileSource" class="field" hidden>
+            <label for="txtFile">TXT 文件</label>
+            <input id="txtFile" type="file" accept=".txt,text/plain">
+            <small>最大 500 KB，UTF-8 编码</small>
+          </div>
+          <div class="controls">
+            <div class="field">
+              <label for="voice">声音</label>
+              <select id="voice"></select>
+            </div>
+            <div class="field">
+              <label for="speed">语速</label>
+              <select id="speed">
+                <option value="0.5">0.5×</option>
+                <option value="0.75">0.75×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.25">1.25×</option>
+                <option value="1.5">1.5×</option>
+                <option value="2">2×</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pitch">音调</label>
+              <select id="pitch">
+                <option value="-50">-50 Hz</option>
+                <option value="-25">-25 Hz</option>
+                <option value="0" selected>0 Hz</option>
+                <option value="25">+25 Hz</option>
+                <option value="50">+50 Hz</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="style">风格</label>
+              <select id="style"></select>
+            </div>
+          </div>
+          <button id="ttsSubmit" class="primary" type="submit">生成语音</button>
+        </form>
+        <p id="ttsStatus" class="status" role="status" aria-live="polite"></p>
+        <div id="ttsResult" class="result" hidden>
+          <audio id="audio" controls></audio>
+          <a id="download" href="#" download="speech.mp3">下载 MP3</a>
+        </div>
+      </section>
+
+      <section id="sttPanel" class="panel" role="tabpanel" aria-labelledby="sttTab" hidden>
+        <form id="sttForm">
+          <div class="field">
+            <label for="audioFile">音频文件</label>
+            <input id="audioFile" type="file" accept=".mp3,.wav,.m4a,.flac,.aac,.ogg,.webm,.amr,.3gp">
+            <small>支持 MP3、WAV、M4A 等，最大 10 MB</small>
+          </div>
+          <div class="field">
+            <label for="sttToken">硅基流动 Token</label>
+            <input id="sttToken" type="password" autocomplete="off" placeholder="如部署者未配置，请输入自己的 Token">
+            <small id="tokenHint"></small>
+          </div>
+          <button id="sttSubmit" class="primary" type="submit">开始转录</button>
+        </form>
+        <p id="sttStatus" class="status" role="status" aria-live="polite"></p>
+        <div id="sttResult" class="result" hidden>
+          <label for="transcription">转录结果（可编辑）</label>
+          <textarea id="transcription" rows="7"></textarea>
+          <div class="actions">
+            <button id="copy" type="button">复制文字</button>
+            <button id="useForTts" type="button">转为语音</button>
+          </div>
+        </div>
+      </section>
+      <ul class="project-info">
+        <li>完全免费 - 无需注册，无使用限制</li>
+        <li id="edgeNotice">基于Edge-TTS的Neural TTS语音服务</li>
+      </ul>
+    </main>
+  </body>
+</html>
