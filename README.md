@@ -8,6 +8,8 @@
 
 项目特点：默认无需 Azure 密钥即可使用 Edge TTS；网页提供 21 种中文声音、文字/TXT 转 MP3，以及适配桌面和手机的界面。另提供 TTS/STT API；STT 需要硅基流动 Token。接口路径与 OpenAI 语音接口相似，但并非完整兼容，也不承诺无限制或永久免费的上游服务。
 
+想了解 TTS 的令牌获取、SSML 合成和风险边界，可阅读[《Edge TTS 实现原理》](docs/edge-tts.md)。
+
 ## 部署
 
 公开仓库可使用一键部署按钮，将项目部署到自己的 Cloudflare 账号：

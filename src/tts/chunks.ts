@@ -25,7 +25,7 @@ export function splitText(text: string, maxCharacters = MAX_CHUNK_CHARACTERS): s
 }
 
 export function joinAudio(parts: Uint8Array[]): ArrayBuffer {
-  // 上游返回同一 MP3 格式的片段；按原顺序拼接字节，不做重新编码。
+  // 上游返回同一 MP3 格式的片段；按原顺序拼接字节，不做重新编码或无缝衔接处理。
   const total = parts.reduce((size, part) => size + part.byteLength, 0);
   const joined = new Uint8Array(total);
   let offset = 0;

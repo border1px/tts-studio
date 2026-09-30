@@ -15,6 +15,7 @@ export function makeSsml(text: string, options: SpeechOptions): string {
   const rate = `${signed(Math.round((options.speed - 1) * 100))}%`;
   const pitch = `${signed(Math.round(options.pitch))}Hz`;
   const volume = `${signed(Math.round(options.volume * 100))}%`;
+  // 输入文字必须作为 XML 文本转义，不能让用户内容变成新的 SSML 标签。
   const prosody = `<prosody rate="${rate}" pitch="${pitch}" volume="${volume}">${escapeXml(text)}</prosody>`;
   // 通用风格只使用 prosody；其余风格才包裹微软扩展的 express-as 标签。
   const content = options.style === "general"
