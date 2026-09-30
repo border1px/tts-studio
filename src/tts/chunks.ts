@@ -3,6 +3,7 @@ import { MAX_CHUNK_CHARACTERS } from "../catalog";
 const SENTENCE_END = /[。！？.!?；;\n]/;
 
 export function splitText(text: string, maxCharacters = MAX_CHUNK_CHARACTERS): string[] {
+  // Array.from 按 Unicode 码点分段；优先在后半段的句末断开，并保留标点。
   const characters = Array.from(text);
   const chunks: string[] = [];
   let start = 0;
@@ -24,6 +25,7 @@ export function splitText(text: string, maxCharacters = MAX_CHUNK_CHARACTERS): s
 }
 
 export function joinAudio(parts: Uint8Array[]): ArrayBuffer {
+  // 上游返回同一 MP3 格式的片段；按原顺序拼接字节，不做重新编码。
   const total = parts.reduce((size, part) => size + part.byteLength, 0);
   const joined = new Uint8Array(total);
   let offset = 0;

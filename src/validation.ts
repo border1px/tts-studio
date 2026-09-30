@@ -12,6 +12,7 @@ const MAX_JSON_BYTES = 64 * 1024;
 const AUDIO_EXTENSIONS = new Set(["mp3", "wav", "m4a", "flac", "aac", "ogg", "webm", "amr", "3gp"]);
 
 async function readLimitedBytes(request: Request, limit: number): Promise<Uint8Array<ArrayBuffer>> {
+  // Content-Length 可能缺失或不可信，因此读取请求流时仍逐块检查实际大小。
   const reader = request.body?.getReader();
   if (!reader) return new Uint8Array(new ArrayBuffer(0));
   const chunks: Uint8Array[] = [];
@@ -61,6 +62,7 @@ function numeric(value: unknown, name: string, fallback: number, min: number, ma
 function speechOptions(value: Record<string, unknown>, input: string): SpeechOptions {
   const text = input.trim();
   if (!text) throw new ApiError(400, "missing_input", "请输入文字", "input");
+  // 以 Unicode 码点而非 UTF-16 码元计数，避免普通表情符号被算成两个。
   if (Array.from(text).length > MAX_TEXT_CHARACTERS) {
     throw new ApiError(413, "text_too_long", `文字不能超过 ${MAX_TEXT_CHARACTERS} 个字符`, "input");
   }
@@ -86,6 +88,7 @@ function speechOptions(value: Record<string, unknown>, input: string): SpeechOpt
 export async function parseSpeechRequest(request: Request): Promise<SpeechOptions> {
   const contentType = request.headers.get("content-type") || "";
   if (contentType.includes("multipart/form-data")) {
+    // 在文件大小上额外预留表单边界和其他字段的空间，解析后再检查文件本身。
     const declaredSize = Number(request.headers.get("content-length") || 0);
     if (declaredSize > MAX_TEXT_FILE_BYTES + 64 * 1024) {
       throw new ApiError(413, "file_too_large", "TXT 文件不能超过 500 KB", "file");

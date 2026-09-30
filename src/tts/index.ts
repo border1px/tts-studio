@@ -11,6 +11,7 @@ export async function synthesizeSpeech(
 ): Promise<ArrayBuffer> {
   const chunks = splitText(options.input);
   const audio: Uint8Array[] = [];
+  // 顺序合成，确保音频片段与原文顺序一致。
   for (const chunk of chunks) {
     audio.push(await synthesizer.synthesize(chunk, options));
   }

@@ -10,6 +10,7 @@ import type { Bindings, Fetcher } from "./types";
 import { parseSpeechRequest, parseTranscriptionRequest } from "./validation";
 
 async function matchingKeys(actual: string, expected: string): Promise<boolean> {
+  // 先转成固定长度摘要，再完整比较，避免按原字符串比较时因长度或前缀提前返回。
   const encoder = new TextEncoder();
   const [actualHash, expectedHash] = await Promise.all([
     crypto.subtle.digest("SHA-256", encoder.encode(actual)),
@@ -37,6 +38,7 @@ export function createApp(dependencies: AppDependencies = {}) {
     allowHeaders: ["Content-Type", "X-API-Key"],
     maxAge: 86400,
   });
+  // 预检请求应先由 CORS 中间件处理，不要求浏览器在 OPTIONS 中携带访问密钥。
   app.use("/api/*", apiCors);
   app.use("/v1/*", apiCors);
 
@@ -77,6 +79,7 @@ export function createApp(dependencies: AppDependencies = {}) {
 
   app.post("/v1/audio/transcriptions", async (c) => {
     const { file, token: suppliedToken } = await parseTranscriptionRequest(c.req.raw);
+    // 调用者自带 Token 优先；服务端 Token 仅作为已配置时的回退。
     const token = suppliedToken || c.env.SILICONFLOW_API_KEY;
     if (!token) throw new ApiError(503, "stt_token_missing", "请提供 token 或配置 SILICONFLOW_API_KEY");
     return c.json({ text: await transcribe(file, token, fetcher) });

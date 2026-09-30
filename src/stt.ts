@@ -5,6 +5,7 @@ export async function transcribe(file: File, token: string, fetcher: Fetcher = (
   const form = new FormData();
   form.append("file", file);
   form.append("model", "FunAudioLLM/SenseVoiceSmall");
+  // 不手写 Content-Type，让运行时为 FormData 自动生成 multipart boundary。
   let response: Response;
   try {
     response = await fetcher("https://api.siliconflow.cn/v1/audio/transcriptions", {

@@ -110,6 +110,7 @@ async function submitSpeech(event) {
     const response = await fetch("/v1/audio/speech", { method: "POST", headers, body });
     if (!response.ok) throw new Error(await responseError(response));
     const blob = await response.blob();
+    // 新音频替换旧音频时释放对象 URL，避免多次生成后占用浏览器内存。
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     audioUrl = URL.createObjectURL(blob);
     $("audio").src = audioUrl;

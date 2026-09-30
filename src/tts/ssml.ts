@@ -16,6 +16,7 @@ export function makeSsml(text: string, options: SpeechOptions): string {
   const pitch = `${signed(Math.round(options.pitch))}Hz`;
   const volume = `${signed(Math.round(options.volume * 100))}%`;
   const prosody = `<prosody rate="${rate}" pitch="${pitch}" volume="${volume}">${escapeXml(text)}</prosody>`;
+  // 通用风格只使用 prosody；其余风格才包裹微软扩展的 express-as 标签。
   const content = options.style === "general"
     ? prosody
     : `<mstts:express-as style="${options.style}">${prosody}</mstts:express-as>`;
