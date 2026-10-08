@@ -16,19 +16,21 @@
 
       <article class="docs-content">
         <h1>API 文档</h1>
-        <p>API 与此文档使用同一个域名。将示例中的 <code>https://YOUR_WORKER.workers.dev</code> 换成当前部署地址。TTS 仅支持 Edge 兼容方式，输出 MP3；STT 使用硅基流动服务。</p>
+        <p>以下示例直接使用本站地址 <code>https://tts.timecapsx.top</code>，无需设置 <code>BASE_URL</code>。TTS 返回 MP3 音频；STT 返回转录文字。上传文件时请换成自己的文件路径，STT 示例还需填入自己的 Token。若自行部署本项目，再把域名换成自己的。</p>
 
-        <h2>鉴权与配置</h2>
-        <p>默认部署不需要访问密钥。如果部署者设置了 <code>APP_ACCESS_KEY</code>，调用下面两个 <code>POST</code> 接口时都要加请求头 <code>X-API-Key: YOUR_ACCESS_KEY</code>。公开的 <code>GET /api/config</code> 可查询 <code>authRequired</code>、声音与风格列表、文件大小限制，以及服务端是否配置 STT Token；不会返回密钥。</p>
-        <pre><code>BASE_URL="https://YOUR_WORKER.workers.dev"
-curl "$BASE_URL/api/config"
-# 需要访问密钥时，在下方 POST 示例加入：
-# -H 'X-API-Key: YOUR_ACCESS_KEY'</code></pre>
+        <h2>调用前须知</h2>
+        <p>这里有两种不同的密钥，作用不要混淆：</p>
+        <ul>
+          <li><strong>本站访问密钥</strong>用于保护本站的 API，通过请求头 <code>X-API-Key</code> 提交。本站目前未启用，下面的 TTS 示例可以直接调用。</li>
+          <li><strong>硅基流动 Token</strong>只用于语音转文字（STT），通过表单字段 <code>token</code> 提交。本站目前没有提供默认 Token，因此调用 STT 时需要填写自己的 Token；TTS 不需要它。</li>
+        </ul>
+        <p>程序可以先读取公开配置，判断这些要求是否有变化：</p>
+        <pre><code>curl 'https://tts.timecapsx.top/api/config'</code></pre>
+        <p>返回的 <code>authRequired</code> 为 <code>true</code> 时，两个 POST 接口都需额外加入 <code>-H 'X-API-Key: 站长提供的访问密钥'</code>；<code>sttServerTokenAvailable</code> 为 <code>false</code> 时，STT 必须提交自己的 <code>token</code>。这个接口还提供声音、风格和大小限制，但不会返回任何真实密钥。</p>
 
         <h2>文字转语音</h2>
         <p><code>POST /v1/audio/speech</code> 接收 JSON 或 UTF-8 TXT 文件，成功时直接返回 <code>audio/mpeg</code>。文本最多 10,000 字符。</p>
-        <pre><code>BASE_URL="https://YOUR_WORKER.workers.dev"
-curl -X POST "$BASE_URL/v1/audio/speech" \
+        <pre><code>curl -X POST 'https://tts.timecapsx.top/v1/audio/speech' \
   -H 'Content-Type: application/json' \
   -d '{"input":"你好，世界","voice":"zh-CN-XiaoxiaoNeural"}' \
   --output speech.mp3</code></pre>
@@ -46,24 +48,22 @@ curl -X POST "$BASE_URL/v1/audio/speech" \
           </table>
         </div>
         <p>上传 TXT 时改用 <code>multipart/form-data</code>：文件字段名为 <code>file</code>，可同时提交上表中的可选参数（不提交 <code>input</code>）。文件最大 500 KB，文本仍限 10,000 字符。</p>
-        <pre><code>BASE_URL="https://YOUR_WORKER.workers.dev"
-curl -X POST "$BASE_URL/v1/audio/speech" \
+        <pre><code>curl -X POST 'https://tts.timecapsx.top/v1/audio/speech' \
   -F 'file=@article.txt' \
   -F 'voice=zh-CN-XiaoxiaoNeural' \
   --output speech.mp3</code></pre>
 
         <h2>语音转文字</h2>
         <p><code>POST /v1/audio/transcriptions</code> 接收 <code>multipart/form-data</code>。<code>file</code> 必填，最大 10 MB，支持 mp3、wav、m4a、flac、aac、ogg、webm、amr、3gp。<code>token</code> 为调用者提供的硅基流动 Token；若部署者已配置服务端 Token，可省略。调用者 Token 优先。</p>
-        <pre><code>BASE_URL="https://YOUR_WORKER.workers.dev"
-curl -X POST "$BASE_URL/v1/audio/transcriptions" \
+        <pre><code>curl -X POST 'https://tts.timecapsx.top/v1/audio/transcriptions' \
   -F 'file=@audio.mp3' \
-  -F 'token=YOUR_SILICONFLOW_TOKEN'</code></pre>
+  -F 'token=填写你的硅基流动Token'</code></pre>
         <p>成功响应为 JSON：<code>{"text":"转录出的文字"}</code>。如果没有服务端 Token 且请求未提供 <code>token</code>，接口返回错误。</p>
 
         <h2>错误响应</h2>
         <p>错误时返回相应的 HTTP 状态码和 JSON；客户端应检查状态码，而不是把错误体当作音频。</p>
         <pre><code>{"error":{"message":"请输入文字","type":"invalid_request_error","param":"input","code":"missing_input"}}</code></pre>
-        <br/><strong><i>飞哥Tips:</i></strong>
+        <h2>使用提醒</h2>
         <p class="docs-note">Edge TTS 使用非公开兼容协议，上游变更可能导致暂时不可用。服务不会保存请求文本、音频文件或生成结果。</p>
       </article>
     </main>
