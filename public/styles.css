@@ -16,7 +16,7 @@ body {
   margin: 0;
   background-color: #f4f7f9;
   background-image: url("/background-pattern.svg"), linear-gradient(180deg, #edf5f6 0, #f4f7f9 260px);
-  background-size: 480px 420px, 100% 100%;
+  background-size: 360px 315px, 100% 100%;
   background-repeat: repeat, no-repeat;
 }
 button, input, select, textarea { font: inherit; }
